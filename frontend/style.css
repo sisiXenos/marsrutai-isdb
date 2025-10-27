@@ -1,15 +1,88 @@
 body {
-  margin: 0;
-  padding: 0;
+  margin:0;
   font-family: Arial, sans-serif;
 }
 
-h1 {
-  text-align: center;
-  margin: 10px 0;
+#topbar {
+  height: 60px;
+  background: #2c3e50;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#topbar button {
+  padding: 8px 12px;
+  background: #3498db;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+#topbar button:hover {
+  background: #2980b9;
+}
+
+#container {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+#sidebar {
+  width: 320px;
+  background: #f7f7f7;
+  border-right: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
 }
 
 #map {
-  height: 90vh;
-  width: 100%;
+  flex: 1;
 }
+
+.tab {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  margin-right: 5px;
+  border-radius: 3px;
+  background: #ecf0f1;
+  display: inline-block;
+}
+
+.tab.active {
+  background: #3498db;
+  color: white;
+  font-weight: bold;
+}
+
+.route-item {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.route-item:hover {
+  background: #ecf0f1;
+}
+
+.btn {
+  padding: 2px 5px;
+  margin-left: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn.edit { background: #f1c40f; color: black; }
+.btn.delete { background: #e74c3c; color: white; }
+
+ul { padding-left: 20px; }

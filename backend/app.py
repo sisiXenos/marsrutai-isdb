@@ -11,11 +11,11 @@ DB_B = {"host": "fragment_b", "database": "business", "user": "userb", "password
 
 @app.route("/")
 def home():
-    return "Flask API veikia! Eik į /api/marsrutai_combined"
+    return "lets hope it works :')"
 
 @app.route("/api/marsrutai_combined")
 def get_routes_combined():
-    # 1️⃣ Prisijungimas prie Fragment A (erdviniai)
+
     connA = psycopg2.connect(**DB_A)
     curA = connA.cursor()
     curA.execute("SELECT marsrutas_id, ST_AsGeoJSON(kelias) FROM marsrutai_spatial;")
@@ -23,7 +23,6 @@ def get_routes_combined():
     curA.close()
     connA.close()
 
-    # 2️⃣ Prisijungimas prie Fragment B (atributai)
     connB = psycopg2.connect(**DB_B)
     curB = connB.cursor()
     curB.execute("SELECT marsrutas_id, pavadinimas, marsruto_tipas_id, aptarnavimas_id FROM marsrutai_business;")
@@ -31,10 +30,9 @@ def get_routes_combined():
     curB.close()
     connB.close()
 
-    # 3️⃣ Kombinavimas į GeoJSON FeatureCollection
     features = []
     for rid, geojson_str in routes_data:
-        geometry = json.loads(geojson_str)  # saugus GeoJSON konvertavimas
+        geometry = json.loads(geojson_str)
         properties = {"marsrutas_id": rid}
         if rid in business_data:
             properties.update(business_data[rid])

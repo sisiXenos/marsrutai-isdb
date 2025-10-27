@@ -46,8 +46,8 @@ CREATE TABLE adresas (
 CREATE TABLE marsrutai_business (
     marsrutas_id INT PRIMARY KEY,
     pavadinimas VARCHAR(255),
-    marsruto_tipas_id INT,
-    aptarnavimas_id INT
+    marsruto_tipas_id INT, -- Nuoroda į marsruto_tipas (iš fragment1.sql)
+    aptarnavimas_id INT    -- Nuoroda į aptarnavimas (iš fragment1.sql)
 );
 
 -- Zones
@@ -84,98 +84,83 @@ CREATE TABLE transporto_priemones (
     degalu_tipas_id INT REFERENCES degalu_tipas(degalu_tipas_id)
 );
 
-CREATE TABLE reisai (
-    reisas_id SERIAL PRIMARY KEY,
-    keleiviu_sk INT,
-    priemone_id INT NOT NULL REFERENCES transporto_priemones(priemone_id),
+-- Routes schedule
+CREATE TABLE marsruto_tvarkarastis (
+    tvarkarastis_id SERIAL PRIMARY KEY,
+    pradzia DATE,
+    pabaiga DATE,
+    marsrutas_id INT NOT NULL REFERENCES marsrutai_business(marsrutas_id),
+    aptarnavimas_id INT NOT NULL -- Nuoroda į aptarnavimas (iš fragment1.sql)
+);
+
+-- Driver-transport assignment
+CREATE TABLE vairuotojo_transporto_priskirtis (
+    priskirtis_id SERIAL PRIMARY KEY,
+    priskirtis_pradzia DATE,
+    priskirtis_pabaiga DATE,
     vairuotojas_id INT NOT NULL REFERENCES vairuotojai(vairuotojas_id),
-    marsrutas_id INT NOT NULL
+    priemone_id INT NOT NULL REFERENCES transporto_priemones(priemone_id)
 );
 
-CREATE TABLE stoteles_business (
-    stotele_id INT PRIMARY KEY,
-    zona_id INT NOT NULL REFERENCES bilietu_zonos(zona_id),
-    adresas_id INT NOT NULL UNIQUE REFERENCES adresas(adresas_id)
-);
--- DB21 DATA
+-- DB21 DATA (5 Maršrutai - Verslo Duomenys)
 
-INSERT INTO marsrutai_business VALUES
-(1,'1G Oro uostas - Centras',1,1),
-(2,'2G Centras - Stotis',1,2),
-(3,'3G Klinikos - Parkas',1,1),
-(4,'4 Ekspress',2,1),
-(5,'5 Priemiestinis',2,2);
+-- Marsrutai (business fragment)
+INSERT INTO marsrutai_business (marsrutas_id, pavadinimas, marsruto_tipas_id, aptarnavimas_id) VALUES
+(1, 'Maršrutas 1 Kaunas', 1, 1),
+(2, 'Maršrutas 2 Kaunas', 2, 1),
+(3, 'Maršrutas 3 Kaunas', 1, 2),
+(4, 'Maršrutas 4 Kaunas', 2, 2),
+(5, 'Maršrutas 5 Kaunas', 1, 1);
 
--- Tickets and zones
-INSERT INTO bilietu_zonos (pavadinimas,kaina,galiojimo_laikas_pradzia,galiojimo_laikas_pabaiga,zonos_ribos,bilieto_tipas_id) VALUES
-('A',1.0,'2024-01-01','2024-12-31',ST_GeomFromText('POLYGON((25.30 54.70,25.31 54.70,25.31 54.71,25.30 54.71,25.30 54.70))',4326),1),
-('B',1.5,'2024-01-01','2024-12-31',ST_GeomFromText('POLYGON((25.32 54.72,25.33 54.72,25.33 54.73,25.32 54.73,25.32 54.72))',4326),2);
+-- Bilietų zonos (priklauso stotelėms)
+INSERT INTO bilietu_zonos (pavadinimas, kaina, galiojimo_laikas_pradzia, galiojimo_laikas_pabaiga, zonos_ribos, bilieto_tipas_id) VALUES
+('Centras', 1.50, '2025-01-01', '2025-12-31', ST_GeomFromText('POLYGON((23.88 54.88,23.88 54.94,23.95 54.94,23.95 54.88,23.88 54.88))',4326), 2),
+('Senamiestis', 2.00, '2025-01-01', '2025-12-31', ST_GeomFromText('POLYGON((23.86 54.86,23.86 54.92,23.92 54.92,23.92 54.86,23.86 54.86))',4326), 2);
 
--- Drivers
-INSERT INTO vairuotojai (vardas,pavarde,gimimo_data,pazymejimo_nr,darbo_pradzios_data,atlyginimas) VALUES
-('Jonas','Jonaitis','1980-01-01','VR100','2010-01-01',1500.00),
-('Petras','Petraitis','1985-05-05','VR101','2012-02-02',1600.00),
-('Ona','Onaitė','1990-09-09','VR102','2015-05-05',1700.00),
-('Ieva','Ivanauskaitė','1992-07-07','VR103','2018-01-01',1400.00),
-('Kazys','Kazlauskas','1975-08-08','VR104','2005-01-01',2000.00);
+-- Vairuotojai
+INSERT INTO vairuotojai (vardas, pavarde, gimimo_data, pazymejimo_nr, darbo_pradzios_data, atlyginimas) VALUES
+('Jonas','Jonaitis','1980-05-01','V001','2010-01-01',1200.00),
+('Petras','Petraitis','1985-07-10','V002','2012-02-01',1300.00),
+('Antanas','Antanaitis','1990-03-15','V003','2015-05-01',1100.00),
+('Rasa','Rasaite','1988-09-20','V004','2013-03-01',1250.00),
+('Laura','Laurynaite','1992-12-05','V005','2016-07-01',1150.00);
 
--- Vehicles
-INSERT INTO transporto_priemones (kodas,vietu_sk,pagaminimo_metai,registracijos_nr,paskutine_apziura_data,tipas_id,degalu_tipas_id) VALUES
-('T001',40,2015,'AAA001','2024-01-01',1,1),
-('T002',30,2017,'AAA002','2023-06-15',2,2),
-('T003',20,2018,'AAA003','2022-04-10',3,3),
-('T004',50,2012,'AAA004','2022-10-11',1,4),
-('T005',45,2016,'AAA005','2023-01-05',1,2);
+-- Transporto priemonės
+INSERT INTO transporto_priemones (kodas, vietu_sk, pagaminimo_metai, registracijos_nr, paskutine_apziura_data, tipas_id, degalu_tipas_id) VALUES
+('T001',50,2015,'KA001','2025-01-01',1,1),
+('T002',45,2016,'KA002','2025-02-01',2,2),
+('T003',30,2018,'KA003','2025-03-01',1,3),
+('T004',60,2014,'KA004','2025-04-01',1,4),
+('T005',40,2017,'KA005','2025-05-01',2,1);
 
--- Trips
-INSERT INTO reisai (keleiviu_sk,priemone_id,vairuotojas_id,marsrutas_id) VALUES
-(30,1,1,1),(45,2,2,2),(22,3,3,3),(38,4,4,4),(40,5,5,5);
+-- Marsruto tvarkaraščiai
+INSERT INTO marsruto_tvarkarastis (pradzia, pabaiga, marsrutas_id, aptarnavimas_id) VALUES
+('2025-10-01','2025-12-31',1,1),
+('2025-10-01','2025-12-31',2,1),
+('2025-10-01','2025-12-31',3,2),
+('2025-10-01','2025-12-31',4,2),
+('2025-10-01','2025-12-31',5,1);
 
--- Stops business attrs
-INSERT INTO adresas (miestas,salis,gatve,gatves_pradzia,gatves_pabaiga) VALUES
-('Vilnius','LT','Geležinkelio g.','1','50'),
-('Vilnius','LT','Ozo g.','1','40');
+-- Vairuotojo-transporto priskyrimai
+INSERT INTO vairuotojo_transporto_priskirtis (priskirtis_pradzia, priskirtis_pabaiga, vairuotojas_id, priemone_id) VALUES
+('2025-10-01','2025-12-31',1,1),
+('2025-10-01','2025-12-31',2,2),
+('2025-10-01','2025-12-31',3,3),
+('2025-10-01','2025-12-31',4,4),
+('2025-10-01','2025-12-31',5,5);
 
-INSERT INTO stoteles_business (stotele_id,zona_id,adresas_id) VALUES
-(1,1,1),(2,2,2);
--- DB22 DATA
+-- Adresai (stotelėms)
+INSERT INTO adresas (miestas, salis, gatve, gatves_pradzia, gatves_pabaiga) VALUES
+('Kaunas','Lithuania','Laisvės al.','1','20'),
+('Kaunas','Lithuania','Karaliaus Mindaugo pr.','1','25'),
+('Kaunas','Lithuania','Savanorių pr.','1','30'),
+('Kaunas','Lithuania','Pramonės pr.','1','15'),
+('Kaunas','Lithuania','Islandijos pl.','1','10');
 
-INSERT INTO marsrutai_business VALUES
-(6,'6 Universitetas - Klinikos',1,1),
-(7,'7 Priemiestinis',2,1),
-(8,'8 Ekspress',2,2),
-(9,'9 Naktinis',1,1),
-(10,'10 Eksperimentinis',2,2);
-
--- Zones
-INSERT INTO bilietu_zonos (pavadinimas,kaina,galiojimo_laikas_pradzia,galiojimo_laikas_pabaiga,zonos_ribos,bilieto_tipas_id) VALUES
-('C',2.0,'2024-01-01','2024-12-31',ST_GeomFromText('POLYGON((25.40 54.70,25.41 54.70,25.41 54.71,25.40 54.71,25.40 54.70))',4326),3),
-('D',2.5,'2024-01-01','2024-12-31',ST_GeomFromText('POLYGON((25.42 54.72,25.43 54.72,25.43 54.73,25.42 54.73,25.42 54.72))',4326),2);
-
--- Drivers
-INSERT INTO vairuotojai (vardas,pavarde,gimimo_data,pazymejimo_nr,darbo_pradzios_data,atlyginimas) VALUES
-('Aldona','Aldonienė','1979-02-02','VR200','2000-01-01',1800.00),
-('Mindaugas','Mindaugaitis','1984-03-03','VR201','2008-03-05',1550.00),
-('Virginija','Virgaitė','1993-06-06','VR202','2014-07-08',1450.00),
-('Tomas','Tomaitis','1987-11-11','VR203','2011-04-04',1600.00),
-('Dalia','Dalyte','1991-05-05','VR204','2017-01-01',1380.00);
-
--- Vehicles
-INSERT INTO transporto_priemones (kodas,vietu_sk,pagaminimo_metai,registracijos_nr,paskutine_apziura_data,tipas_id,degalu_tipas_id) VALUES
-('T006',25,2019,'AAA006','2023-05-05',3,3),
-('T007',35,2016,'AAA007','2023-09-09',2,2),
-('T008',60,2014,'AAA008','2022-11-11',1,1),
-('T009',40,2018,'AAA009','2023-04-04',1,4),
-('T010',50,2020,'AAA010','2024-01-01',2,2);
-
--- Trips
-INSERT INTO reisai (keleiviu_sk,priemone_id,vairuotojas_id,marsrutas_id) VALUES
-(25,1,1,6),(30,2,2,7),(50,3,3,8),(20,4,4,9),(28,5,5,10);
-
--- Stops business attrs
-INSERT INTO adresas (miestas,salis,gatve,gatves_pradzia,gatves_pabaiga) VALUES
-('Kaunas','LT','Laisvės al.','1','60'),
-('Klaipėda','LT','Taikos pr.','1','30');
-
-INSERT INTO stoteles_business (stotele_id,zona_id,adresas_id) VALUES
-(6,1,1),(7,2,2);
+-- Stoteles business (tiekiame zona ir adresą)
+INSERT INTO stoteles_business (stotele_id, zona_id, adresas_id) VALUES
+(1,1,1),
+(2,1,2),
+(3,2,3),
+(4,2,4),
+(5,1,5);

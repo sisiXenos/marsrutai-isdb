@@ -42,7 +42,7 @@ CREATE TABLE marsrutai_spatial (
 
 -- Stops
 CREATE TABLE stoteles (
-    stotele_id SERIAL PRIMARY KEY,
+    stotele_id INT PRIMARY KEY, -- Pakeista į INT, kad atitiktų GTFS stop_id
     pavadinimas VARCHAR(255),
     stoteles_erdvine_vieta GEOMETRY(POINT, 4326),
     paviljono_tipas_id INT REFERENCES paviljono_tipas(paviljono_tipas_id)
@@ -68,70 +68,90 @@ CREATE TABLE reisu_laikai (
     marsruto_stotele_id INT NOT NULL REFERENCES marsruto_stoteles(marsruto_stotele_id)
 );
 
--- DB11 DATA
-
--- Routes 1–5 spatial half
 INSERT INTO marsrutai_spatial VALUES
-(1, ST_GeomFromText('LINESTRING(25.30 54.70,25.35 54.72)',4326), 12.1, 30, TRUE),
-(2, ST_GeomFromText('LINESTRING(25.31 54.71,25.36 54.73)',4326), 15.2, 40, TRUE),
-(3, ST_GeomFromText('LINESTRING(25.32 54.72,25.37 54.74)',4326), 10.0, 25, TRUE),
-(4, ST_GeomFromText('LINESTRING(25.33 54.73,25.38 54.75)',4326), 20.5, 50, FALSE),
-(5, ST_GeomFromText('LINESTRING(25.34 54.74,25.39 54.76)',4326), 18.0, 45, TRUE);
+(1, ST_GeomFromText('LINESTRING(23.88 54.89, 23.90 54.90, 23.92 54.91, 23.94 54.92, 23.95 54.93)',4326), 10, 30, TRUE),
+(2, ST_GeomFromText('LINESTRING(23.88 54.88, 23.89 54.89, 23.91 54.90, 23.93 54.91, 23.94 54.92)',4326), 12, 35, TRUE),
+(3, ST_GeomFromText('LINESTRING(23.89 54.88, 23.90 54.89, 23.91 54.90, 23.92 54.91, 23.93 54.92)',4326), 11, 33, TRUE),
+(4, ST_GeomFromText('LINESTRING(23.87 54.88, 23.88 54.89, 23.89 54.90, 23.90 54.91, 23.91 54.92)',4326), 9, 28, TRUE),
+(5, ST_GeomFromText('LINESTRING(23.86 54.87, 23.87 54.88, 23.88 54.89, 23.89 54.90, 23.90 54.91)',4326), 10, 30, TRUE);
 
--- Stops for each route
-INSERT INTO stoteles (pavadinimas,stoteles_erdvine_vieta,paviljono_tipas_id) VALUES
-('Stotis',ST_SetSRID(ST_Point(25.30,54.70),4326),1),
-('Centras',ST_SetSRID(ST_Point(25.31,54.71),4326),2),
-('Universitetas',ST_SetSRID(ST_Point(25.32,54.72),4326),3),
-('Klinikos',ST_SetSRID(ST_Point(25.33,54.73),4326),1),
-('Parkas',ST_SetSRID(ST_Point(25.34,54.74),4326),2),
-('Stadionas',ST_SetSRID(ST_Point(25.35,54.75),4326),3),
-('Teatras',ST_SetSRID(ST_Point(25.36,54.76),4326),1),
-('Poliklinika',ST_SetSRID(ST_Point(25.37,54.77),4326),2),
-('Biblioteka',ST_SetSRID(ST_Point(25.38,54.78),4326),3),
-('Oro uostas',ST_SetSRID(ST_Point(25.39,54.79),4326),1);
+-- 25 Stotelės (5 per route)
+INSERT INTO stoteles (stotele_id, pavadinimas, stoteles_erdvine_vieta, paviljono_tipas_id) VALUES
+(1,'Stotis',ST_SetSRID(ST_Point(23.88,54.89),4326),1),
+(2,'Centras',ST_SetSRID(ST_Point(23.90,54.90),4326),2),
+(3,'Universitetas',ST_SetSRID(ST_Point(23.92,54.91),4326),3),
+(4,'Klinikos',ST_SetSRID(ST_Point(23.94,54.92),4326),1),
+(5,'Parkas',ST_SetSRID(ST_Point(23.95,54.93),4326),2),
 
--- Route stops (attach subset of stops to routes)
+(6,'Akropolis',ST_SetSRID(ST_Point(23.88,54.88),4326),1),
+(7,'Zoo Park',ST_SetSRID(ST_Point(23.89,54.89),4326),2),
+(8,'Technikos Muziejus',ST_SetSRID(ST_Point(23.91,54.90),4326),3),
+(9,'Tiltas',ST_SetSRID(ST_Point(23.93,54.91),4326),1),
+(10,'Oro Uostas',ST_SetSRID(ST_Point(23.94,54.92),4326),2),
+
+(11,'Stadionas',ST_SetSRID(ST_Point(23.89,54.88),4326),1),
+(12,'Teatras',ST_SetSRID(ST_Point(23.90,54.89),4326),2),
+(13,'Poliklinika',ST_SetSRID(ST_Point(23.91,54.90),4326),3),
+(14,'Biblioteka',ST_SetSRID(ST_Point(23.92,54.91),4326),1),
+(15,'Kauno Arena',ST_SetSRID(ST_Point(23.93,54.92),4326),2),
+
+(16,'Muziejus',ST_SetSRID(ST_Point(23.87,54.88),4326),1),
+(17,'Bažnyčia',ST_SetSRID(ST_Point(23.88,54.89),4326),2),
+(18,'Senamiestis',ST_SetSRID(ST_Point(23.89,54.90),4326),3),
+(19,'Nemunas',ST_SetSRID(ST_Point(23.90,54.91),4326),1),
+(20,'Ąžuolynas',ST_SetSRID(ST_Point(23.91,54.92),4326),2),
+
+(21,'Pilaitė',ST_SetSRID(ST_Point(23.86,54.87),4326),1),
+(22,'Vingis',ST_SetSRID(ST_Point(23.87,54.88),4326),2),
+(23,'Ąžuolas',ST_SetSRID(ST_Point(23.88,54.89),4326),3),
+(24,'Laisvės al.',ST_SetSRID(ST_Point(23.89,54.90),4326),1),
+(25,'Karaliaus Mindaugo pr.',ST_SetSRID(ST_Point(23.90,54.91),4326),2);
+
+-- Maršruto stotelės (5 per route)
 INSERT INTO marsruto_stoteles (eiles_nr_marsrute,atstumas_nuo_pradzios,stotele_id,marsrutas_id) VALUES
-(1,0,1,1),(2,3.0,2,1),
-(1,0,3,2),(2,4.0,4,2),
-(1,0,5,3),(2,2.0,6,3),
-(1,0,7,4),(2,5.5,8,4),
-(1,0,9,5),(2,6.0,10,5);
+(1,0,1,1),(2,2,2,1),(3,4,3,1),(4,6,4,1),(5,8,5,1),
+(1,0,6,2),(2,2,7,2),(3,4,8,2),(4,6,9,2),(5,8,10,2),
+(1,0,11,3),(2,2,12,3),(3,4,13,3),(4,6,14,3),(5,8,15,3),
+(1,0,16,4),(2,2,17,4),(3,4,18,4),(4,6,19,4),(5,8,20,4),
+(1,0,21,5),(2,2,22,5),(3,4,23,5),(4,6,24,5),(5,8,25,5);
 
--- Journey times (referencing marsruto_stoteles)
-INSERT INTO reisu_laikai (nuvaziuotas_atstumas,faktinis_atvykimo_laikas,faktinis_isvykimo_laikas,
-planuojamas_atvykimo_laikas,planuojamas_isvykimo_laikas,marsruto_stotele_id) VALUES
-(0,'2024-06-01 08:00','2024-06-01 08:05','2024-06-01 08:00','2024-06-01 08:05',1),
-(3,'2024-06-01 08:20','2024-06-01 08:21','2024-06-01 08:18','2024-06-01 08:19',2),
-(0,'2024-06-01 09:00','2024-06-01 09:02','2024-06-01 09:00','2024-06-01 09:02',3),
-(4,'2024-06-01 09:20','2024-06-01 09:21','2024-06-01 09:18','2024-06-01 09:19',4),
-(0,'2024-06-01 10:00','2024-06-01 10:02','2024-06-01 10:00','2024-06-01 10:02',5);
--- DB12 DATA
+-- Reisu laikai (Kauno maršrutai, po 5 stoteles kiekvienam)
+INSERT INTO reisu_laikai (nuvaziuotas_atstumas, faktinis_atvykimo_laikas, faktinis_isvykimo_laikas,
+                          planuojamas_atvykimo_laikas, planuojamas_isvykimo_laikas, marsruto_stotele_id)
+VALUES
+-- Maršrutas 1
+(0, '2025-10-27 08:00', '2025-10-27 08:02', '2025-10-27 08:00', '2025-10-27 08:02', 1),
+(2, '2025-10-27 08:05', '2025-10-27 08:06', '2025-10-27 08:04', '2025-10-27 08:05', 2),
+(4, '2025-10-27 08:10', '2025-10-27 08:11', '2025-10-27 08:09', '2025-10-27 08:10', 3),
+(6, '2025-10-27 08:15', '2025-10-27 08:16', '2025-10-27 08:14', '2025-10-27 08:15', 4),
+(8, '2025-10-27 08:20', '2025-10-27 08:21', '2025-10-27 08:19', '2025-10-27 08:20', 5),
 
-INSERT INTO marsrutai_spatial VALUES
-(6, ST_GeomFromText('LINESTRING(25.40 54.70,25.45 54.72)',4326), 13.0, 32, TRUE),
-(7, ST_GeomFromText('LINESTRING(25.41 54.71,25.46 54.73)',4326), 16.0, 42, TRUE),
-(8, ST_GeomFromText('LINESTRING(25.42 54.72,25.47 54.74)',4326), 11.0, 26, FALSE),
-(9, ST_GeomFromText('LINESTRING(25.43 54.73,25.48 54.75)',4326), 22.0, 55, TRUE),
-(10, ST_GeomFromText('LINESTRING(25.44 54.74,25.49 54.76)',4326), 19.0, 48, TRUE);
+-- Maršrutas 2
+(0, '2025-10-27 09:00', '2025-10-27 09:02', '2025-10-27 09:00', '2025-10-27 09:02', 6),
+(2, '2025-10-27 09:05', '2025-10-27 09:06', '2025-10-27 09:04', '2025-10-27 09:05', 7),
+(4, '2025-10-27 09:10', '2025-10-27 09:11', '2025-10-27 09:09', '2025-10-27 09:10', 8),
+(6, '2025-10-27 09:15', '2025-10-27 09:16', '2025-10-27 09:14', '2025-10-27 09:15', 9),
+(8, '2025-10-27 09:20', '2025-10-27 09:21', '2025-10-27 09:19', '2025-10-27 09:20', 10),
 
--- Stops
-INSERT INTO stoteles (pavadinimas,stoteles_erdvine_vieta,paviljono_tipas_id) VALUES
-('Akropolis',ST_SetSRID(ST_Point(25.40,54.70),4326),1),
-('Zoo Park',ST_SetSRID(ST_Point(25.41,54.71),4326),2),
-('Technikos Muziejus',ST_SetSRID(ST_Point(25.42,54.72),4326),3),
-('Jūra',ST_SetSRID(ST_Point(25.43,54.73),4326),1),
-('Tiltas',ST_SetSRID(ST_Point(25.44,54.74),4326),2);
+-- Maršrutas 3
+(0, '2025-10-27 10:00', '2025-10-27 10:02', '2025-10-27 10:00', '2025-10-27 10:02', 11),
+(2, '2025-10-27 10:05', '2025-10-27 10:06', '2025-10-27 10:04', '2025-10-27 10:05', 12),
+(4, '2025-10-27 10:10', '2025-10-27 10:11', '2025-10-27 10:09', '2025-10-27 10:10', 13),
+(6, '2025-10-27 10:15', '2025-10-27 10:16', '2025-10-27 10:14', '2025-10-27 10:15', 14),
+(8, '2025-10-27 10:20', '2025-10-27 10:21', '2025-10-27 10:19', '2025-10-27 10:20', 15),
 
--- Route stops
-INSERT INTO marsruto_stoteles (eiles_nr_marsrute,atstumas_nuo_pradzios,stotele_id,marsrutas_id) VALUES
-(1,0,1,6),(2,3.5,2,6),
-(1,0,3,7),(2,2.5,4,7),
-(1,0,5,8);
+-- Maršrutas 4
+(0, '2025-10-27 11:00', '2025-10-27 11:02', '2025-10-27 11:00', '2025-10-27 11:02', 16),
+(2, '2025-10-27 11:05', '2025-10-27 11:06', '2025-10-27 11:04', '2025-10-27 11:05', 17),
+(4, '2025-10-27 11:10', '2025-10-27 11:11', '2025-10-27 11:09', '2025-10-27 11:10', 18),
+(6, '2025-10-27 11:15', '2025-10-27 11:16', '2025-10-27 11:14', '2025-10-27 11:15', 19),
+(8, '2025-10-27 11:20', '2025-10-27 11:21', '2025-10-27 11:19', '2025-10-27 11:20', 20),
 
--- Times
-INSERT INTO reisu_laikai (nuvaziuotas_atstumas,faktinis_atvykimo_laikas,faktinis_isvykimo_laikas,
-planuojamas_atvykimo_laikas,planuojamas_isvykimo_laikas,marsruto_stotele_id) VALUES
-(0,'2024-06-02 08:00','2024-06-02 08:03','2024-06-02 08:00','2024-06-02 08:03',1),
-(3.5,'2024-06-02 08:20','2024-06-02 08:21','2024-06-02 08:18','2024-06-02 08:19',2);
+-- Maršrutas 5
+(0, '2025-10-27 12:00', '2025-10-27 12:02', '2025-10-27 12:00', '2025-10-27 12:02', 21),
+(2, '2025-10-27 12:05', '2025-10-27 12:06', '2025-10-27 12:04', '2025-10-27 12:05', 22),
+(4, '2025-10-27 12:10', '2025-10-27 12:11', '2025-10-27 12:09', '2025-10-27 12:10', 23),
+(6, '2025-10-27 12:15', '2025-10-27 12:16', '2025-10-27 12:14', '2025-10-27 12:15', 24),
+(8, '2025-10-27 12:20', '2025-10-27 12:21', '2025-10-27 12:19', '2025-10-27 12:20', 25);
+
+
