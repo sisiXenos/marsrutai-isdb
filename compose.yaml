@@ -1,0 +1,81 @@
+services:
+  fragment_A:
+    image: postgis/postgis:latest
+    container_name: fragment_a
+    restart: always
+    environment:
+      POSTGRES_DB: spatial
+      POSTGRES_USER: usera
+      POSTGRES_PASSWORD: user
+    ports:
+      - "3001:5432"
+    volumes:
+      - ./sql/fragment_A_init.sql:/docker-entrypoint-initdb.d/init.sql
+      - fragment_a_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  fragment_B:
+    image: postgis/postgis:latest
+    container_name: fragment_b
+    restart: always
+    environment:
+      POSTGRES_DB: business
+      POSTGRES_USER: userb
+      POSTGRES_PASSWORD: user
+    ports:
+      - "3002:5432"
+    volumes:
+      - ./sql/fragment_B_init.sql:/docker-entrypoint-initdb.d/init.sql
+      - fragment_b_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin4
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: user@user.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "8000:80"
+  #   volumes:
+  #     - pgadmin_data:/var/lib/pgadmin
+  #   networks:
+  #     - db_network
+
+  # --- pridėta žemiau ---
+  backend:
+    build: ./backend
+    container_name: gis_backend
+    restart: always
+    environment:
+      - FLASK_ENV=development
+    ports:
+      - "5000:5000"
+    depends_on:
+      - fragment_A
+      - fragment_B
+    networks:
+      - db_network
+
+  frontend:
+    image: nginx:alpine
+    container_name: gis_frontend
+    restart: always
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    ports:
+      - "8088:80"
+    networks:
+      - db_network
+
+networks:
+  db_network:
+    driver: bridge
+
+volumes:
+  fragment_a_data:
+  fragment_b_data:
+  pgadmin_data:
