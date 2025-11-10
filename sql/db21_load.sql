@@ -1,11 +1,12 @@
--- DB21 DATA
+-- DB21 DATA (Maršrutinis routes - marsruto_tipas_id = 1)
 
+-- Routes 1-3: Maršrutinis type - business attributes
+-- Route 5 also stored here (completely different from route 5 in DB22)
 INSERT INTO marsrutai_business VALUES
 (1,'1G Oro uostas - Centras',1,1),
 (2,'2G Centras - Stotis',1,2),
 (3,'3G Klinikos - Parkas',1,1),
-(4,'4 Ekspress',2,1),
-(5,'5 Priemiestinis',2,2);
+(5,'5A City Route',1,1);
 
 -- Tickets and zones
 INSERT INTO bilietu_zonos (pavadinimas,kaina,galiojimo_laikas_pradzia,galiojimo_laikas_pabaiga,zonos_ribos,bilieto_tipas_id) VALUES
@@ -28,9 +29,9 @@ INSERT INTO transporto_priemones (kodas,vietu_sk,pagaminimo_metai,registracijos_
 ('T004',50,2012,'AAA004','2022-10-11',1,4),
 ('T005',45,2016,'AAA005','2023-01-05',1,2);
 
--- Trips
+-- Trips (only for Maršrutinis routes 1-3 and 5)
 INSERT INTO reisai (keleiviu_sk,priemone_id,vairuotojas_id,marsrutas_id) VALUES
-(30,1,1,1),(45,2,2,2),(22,3,3,3),(38,4,4,4),(40,5,5,5);
+(30,1,1,1),(45,2,2,2),(22,3,3,3),(28,4,4,5);
 
 -- Stops business attrs
 INSERT INTO adresas (miestas,salis,gatve,gatves_pradzia,gatves_pabaiga) VALUES

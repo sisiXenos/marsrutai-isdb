@@ -1,11 +1,10 @@
--- DB22 DATA
+-- DB22 DATA (Tarpmiestinis routes - marsruto_tipas_id = 2)
 
+-- Routes 4-5: Tarpmiestinis type - business attributes
+-- Route 5 stored here too (DIFFERENT route than the one in DB21)
 INSERT INTO marsrutai_business VALUES
-(6,'6 Universitetas - Klinikos',1,1),
-(7,'7 Priemiestinis',2,1),
-(8,'8 Ekspress',2,2),
-(9,'9 Naktinis',1,1),
-(10,'10 Eksperimentinis',2,2);
+(4,'4 Ekspress',2,1),
+(5,'5B Intercity Route',2,2);
 
 -- Zones
 INSERT INTO bilietu_zonos (pavadinimas,kaina,galiojimo_laikas_pradzia,galiojimo_laikas_pabaiga,zonos_ribos,bilieto_tipas_id) VALUES
@@ -28,9 +27,9 @@ INSERT INTO transporto_priemones (kodas,vietu_sk,pagaminimo_metai,registracijos_
 ('T009',40,2018,'AAA009','2023-04-04',1,4),
 ('T010',50,2020,'AAA010','2024-01-01',2,2);
 
--- Trips
+-- Trips (only for Tarpmiestinis routes 4-5)
 INSERT INTO reisai (keleiviu_sk,priemone_id,vairuotojas_id,marsrutas_id) VALUES
-(25,1,1,6),(30,2,2,7),(50,3,3,8),(20,4,4,9),(28,5,5,10);
+(38,1,1,4),(40,2,2,5);
 
 -- Stops business attrs
 INSERT INTO adresas (miestas,salis,gatve,gatves_pradzia,gatves_pabaiga) VALUES

@@ -1,6 +1,7 @@
 services:
   fragment_A:
     image: postgis/postgis:latest
+    platform: linux/amd64
     container_name: fragment_a
     restart: always
     environment:
@@ -17,6 +18,7 @@ services:
 
   fragment_B:
     image: postgis/postgis:latest
+    platform: linux/amd64
     container_name: fragment_b
     restart: always
     environment:
@@ -28,6 +30,78 @@ services:
     volumes:
       - ./sql/fragment_B_init.sql:/docker-entrypoint-initdb.d/init.sql
       - fragment_b_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  db11:
+    image: postgis/postgis:latest
+    platform: linux/amd64
+    container_name: db11
+    restart: always
+    environment:
+      POSTGRES_DB: spatial
+      POSTGRES_USER: user11
+      POSTGRES_PASSWORD: user
+    ports:
+      - "5011:5432"
+    volumes:
+      - ./sql/fragment1.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./sql/db11_load.sql:/docker-entrypoint-initdb.d/02-data.sql
+      - db11_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  db12:
+    image: postgis/postgis:latest
+    platform: linux/amd64
+    container_name: db12
+    restart: always
+    environment:
+      POSTGRES_DB: spatial
+      POSTGRES_USER: user12
+      POSTGRES_PASSWORD: user
+    ports:
+      - "5012:5432"
+    volumes:
+      - ./sql/fragment1.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./sql/db12_load.sql:/docker-entrypoint-initdb.d/02-data.sql
+      - db12_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  db21:
+    image: postgis/postgis:latest
+    platform: linux/amd64
+    container_name: db21
+    restart: always
+    environment:
+      POSTGRES_DB: business
+      POSTGRES_USER: user21
+      POSTGRES_PASSWORD: user
+    ports:
+      - "5021:5432"
+    volumes:
+      - ./sql/fragment2.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./sql/db21_load.sql:/docker-entrypoint-initdb.d/02-data.sql
+      - db21_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  db22:
+    image: postgis/postgis:latest
+    platform: linux/amd64
+    container_name: db22
+    restart: always
+    environment:
+      POSTGRES_DB: business
+      POSTGRES_USER: user22
+      POSTGRES_PASSWORD: user
+    ports:
+      - "5022:5432"
+    volumes:
+      - ./sql/fragment2.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./sql/db22_load.sql:/docker-entrypoint-initdb.d/02-data.sql
+      - db22_data:/var/lib/postgresql/data
     networks:
       - db_network
 
@@ -57,6 +131,10 @@ services:
     depends_on:
       - fragment_A
       - fragment_B
+      - db11
+      - db12
+      - db21
+      - db22
     networks:
       - db_network
 
@@ -78,4 +156,8 @@ networks:
 volumes:
   fragment_a_data:
   fragment_b_data:
+  db11_data:
+  db12_data:
+  db21_data:
+  db22_data:
   pgadmin_data:

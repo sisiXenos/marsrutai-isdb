@@ -1,25 +1,23 @@
--- DB12 DATA
+-- DB12 DATA (Tarpmiestinis routes - marsruto_tipas_id = 2)
 
+-- Routes 4-5: Tarpmiestinis type - spatial half
+-- Route 5 exists in both DB11 and DB12 as DIFFERENT routes
 INSERT INTO marsrutai_spatial VALUES
-(6, ST_GeomFromText('LINESTRING(25.40 54.70,25.45 54.72)',4326), 13.0, 32, TRUE),
-(7, ST_GeomFromText('LINESTRING(25.41 54.71,25.46 54.73)',4326), 16.0, 42, TRUE),
-(8, ST_GeomFromText('LINESTRING(25.42 54.72,25.47 54.74)',4326), 11.0, 26, FALSE),
-(9, ST_GeomFromText('LINESTRING(25.43 54.73,25.48 54.75)',4326), 22.0, 55, TRUE),
-(10, ST_GeomFromText('LINESTRING(25.44 54.74,25.49 54.76)',4326), 19.0, 48, TRUE);
+(4, ST_GeomFromText('LINESTRING(25.33 54.73,25.38 54.75)',4326), 20.5, 50, FALSE),
+(5, ST_GeomFromText('LINESTRING(25.34 54.74,25.39 54.76)',4326), 18.0, 45, TRUE);
 
 -- Stops
 INSERT INTO stoteles (pavadinimas,stoteles_erdvine_vieta,paviljono_tipas_id) VALUES
-('Akropolis',ST_SetSRID(ST_Point(25.40,54.70),4326),1),
-('Zoo Park',ST_SetSRID(ST_Point(25.41,54.71),4326),2),
-('Technikos Muziejus',ST_SetSRID(ST_Point(25.42,54.72),4326),3),
-('Jūra',ST_SetSRID(ST_Point(25.43,54.73),4326),1),
-('Tiltas',ST_SetSRID(ST_Point(25.44,54.74),4326),2);
+('Klinikos',ST_SetSRID(ST_Point(25.33,54.73),4326),1),
+('Parkas',ST_SetSRID(ST_Point(25.34,54.74),4326),2),
+('Stadionas',ST_SetSRID(ST_Point(25.35,54.75),4326),3),
+('Teatras',ST_SetSRID(ST_Point(25.36,54.76),4326),1),
+('Poliklinika',ST_SetSRID(ST_Point(25.37,54.77),4326),2);
 
--- Route stops
+-- Route stops (for routes 4-5)
 INSERT INTO marsruto_stoteles (eiles_nr_marsrute,atstumas_nuo_pradzios,stotele_id,marsrutas_id) VALUES
-(1,0,1,6),(2,3.5,2,6),
-(1,0,3,7),(2,2.5,4,7),
-(1,0,5,8);
+(1,0,1,4),(2,5.5,2,4),
+(1,0,3,5),(2,6.0,4,5);
 
 -- Times
 INSERT INTO reisu_laikai (nuvaziuotas_atstumas,faktinis_atvykimo_laikas,faktinis_isvykimo_laikas,
