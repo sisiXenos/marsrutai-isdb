@@ -1,31 +1,47 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAUNO MARŠRUTAI</title>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maršrutų žemėlapis</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 </head>
 <body>
+  <h1>Maršrutai</h1>
 
-<div id="topbar">
-  <div id="title">KAUNO MARŠRUTAI</div>
-  <button id="createRouteBtn">Sukurti maršrutą</button>
-</div>
-
-<div id="container">
-  <div id="sidebar">
-    <div id="tabs"></div>
-    <h3>Maršrutai</h3>
-    <div id="routeList"></div>
-    <h4>Stotelės</h4>
-    <ul id="stotelesList"></ul>
-  </div>
+  <!-- Žemėlapis -->
   <div id="map"></div>
+
+  <!-- Maršrutų sąrašas -->
+  <h2>Maršrutų sąrašas</h2>
+
+  <div id="filters">
+  <label>Pavadinimas: <input type="text" id="filter-name" /></label>
+  <label>Aktyvus:
+    <select id="filter-active">
+      <option value="active">Taip</option>
+      <option value="inactive">Ne</option>
+    </select>
+  </label>
+  <label>Tipas:
+  <select id="filter-type">
+    <option value="1">Maršrutinis</option>
+    <option value="2">Tarpmiestinis</option>
+  </select>
+</label>
+  <button id="apply-filters">Filtruoti</button>
+  <button id="clear-filters">Išvalyti filtrus</button>
 </div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="script.js"></script>
+  <ul id="routes-list"></ul>
+  <h2>Stotelės pasirinktam maršrutui</h2>
+  <ul id="stoteles-list"></ul>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

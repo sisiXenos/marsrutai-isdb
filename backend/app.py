@@ -210,6 +210,16 @@ def delete_stotele(stotele_id):
         logger.error(f"Error deleting stop: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route("/api/stoteles/marsrutas/<int:marsrutas_id>", methods=['GET'])
+def get_stoteles_by_route(marsrutas_id):
+    """Get all stops for a specific route"""
+    try:
+        result = StoteleCRUD.get_stoteles_for_route(marsrutas_id)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error getting stops for route {marsrutas_id}: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 # ==================== GeoJSON endpoint for map visualization ====================
 
 @app.route("/api/marsrutai/geojson", methods=['GET'])

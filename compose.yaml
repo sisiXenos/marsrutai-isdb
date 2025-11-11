@@ -1,37 +1,37 @@
 services:
-  fragment_A:
-    image: postgis/postgis:latest
-    platform: linux/amd64
-    container_name: fragment_a
-    restart: always
-    environment:
-      POSTGRES_DB: spatial
-      POSTGRES_USER: usera
-      POSTGRES_PASSWORD: user
-    ports:
-      - "3001:5432"
-    volumes:
-      - ./sql/fragment_A_init.sql:/docker-entrypoint-initdb.d/init.sql
-      - fragment_a_data:/var/lib/postgresql/data
-    networks:
-      - db_network
+  # fragment_A:
+  #   image: postgis/postgis:latest
+  #   platform: linux/amd64
+  #   container_name: fragment_a
+  #   restart: always
+  #   environment:
+  #     POSTGRES_DB: spatial
+  #     POSTGRES_USER: usera
+  #     POSTGRES_PASSWORD: user
+  #   ports:
+  #     - "3001:5432"
+  #   volumes:
+  #     - ./sql/fragment_A_init.sql:/docker-entrypoint-initdb.d/init.sql
+  #     - fragment_a_data:/var/lib/postgresql/data
+  #   networks:
+  #     - db_network
 
-  fragment_B:
-    image: postgis/postgis:latest
-    platform: linux/amd64
-    container_name: fragment_b
-    restart: always
-    environment:
-      POSTGRES_DB: business
-      POSTGRES_USER: userb
-      POSTGRES_PASSWORD: user
-    ports:
-      - "3002:5432"
-    volumes:
-      - ./sql/fragment_B_init.sql:/docker-entrypoint-initdb.d/init.sql
-      - fragment_b_data:/var/lib/postgresql/data
-    networks:
-      - db_network
+  # fragment_B:
+  #   image: postgis/postgis:latest
+  #   platform: linux/amd64
+  #   container_name: fragment_b
+  #   restart: always
+  #   environment:
+  #     POSTGRES_DB: business
+  #     POSTGRES_USER: userb
+  #     POSTGRES_PASSWORD: user
+  #   ports:
+  #     - "3002:5432"
+  #   volumes:
+  #     - ./sql/fragment_B_init.sql:/docker-entrypoint-initdb.d/init.sql
+  #     - fragment_b_data:/var/lib/postgresql/data
+  #   networks:
+  #     - db_network
 
   db11:
     image: postgis/postgis:latest
@@ -129,8 +129,8 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - fragment_A
-      - fragment_B
+      # - fragment_A
+      # - fragment_B
       - db11
       - db12
       - db21

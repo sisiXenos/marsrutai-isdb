@@ -304,7 +304,7 @@ class MarsrutaiCRUD:
             raise ValueError(f"Invalid route type: {marsruto_tipas_id}")
         
         logger.info(f"Deleting route {marsrutas_id} (type {marsruto_tipas_id}) from {spatial_db}/{business_db}")
-            raise ValueError(f"Invalid route ID: {marsrutas_id}")
+        raise ValueError(f"Invalid route ID: {marsrutas_id}")
         
         queries = {
             spatial_db: [(
@@ -653,3 +653,21 @@ class StoteleCRUD:
                 pass  # Stop might not exist in this DB
         
         return {"success": True, "message": f"Stop {stotele_id} deleted"}
+    
+    def get_stoteles_for_route(marsrutas_id):
+        """Return all stops for a given route"""
+        stops = []
+        for db in get_all_spatial_dbs():
+            data = DatabaseManager.execute_query(
+                db,
+                """SELECT s.stotele_id, s.pavadinimas,
+                          ST_X(s.stoteles_erdvine_vieta) as lon,
+                          ST_Y(s.stoteles_erdvine_vieta) as lat
+                   FROM stoteles s
+                   JOIN marsruto_stoteles ms ON s.stotele_id = ms.stotele_id
+                   WHERE ms.marsrutas_id = %s""",
+                (marsrutas_id,)
+            )
+            stops.extend([dict(row) for row in data])
+        return {"success": True, "data": stops}
+    
