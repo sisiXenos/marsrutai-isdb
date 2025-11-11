@@ -286,8 +286,8 @@ class MarsrutaiCRUD:
     @staticmethod
     def delete(marsrutas_id):
         """
-        Delete a route from both spatial and business databases
-        First finds which databases contain the route, then deletes
+        Delete a route from all databases where it exists
+        Handles routes that may exist in multiple database pairs
         """
         # First, find which databases contain this route
         route_info = MarsrutaiCRUD.read(marsrutas_id)
@@ -295,33 +295,52 @@ class MarsrutaiCRUD:
         if not route_info.get('success'):
             return {"success": False, "error": f"Route {marsrutas_id} not found"}
         
-        # Get the route type to determine which databases to delete from
-        marsruto_tipas_id = route_info['data']['marsruto_tipas_id']
-        spatial_db = get_spatial_db_for_route_type(marsruto_tipas_id)
-        business_db = get_business_db_for_route_type(marsruto_tipas_id)
+        queries = {}
+        deleted_from = []
         
-        if not spatial_db or not business_db:
-            raise ValueError(f"Invalid route type: {marsruto_tipas_id}")
+        # Check if route exists in multiple locations
+        routes_data = route_info['data']
+        if not isinstance(routes_data, list):
+            routes_data = [routes_data]
         
-        logger.info(f"Deleting route {marsrutas_id} (type {marsruto_tipas_id}) from {spatial_db}/{business_db}")
-        raise ValueError(f"Invalid route ID: {marsrutas_id}")
+        # Delete from all database pairs where the route exists
+        for route_data in routes_data:
+            marsruto_tipas_id = route_data['marsruto_tipas_id']
+            spatial_db = get_spatial_db_for_route_type(marsruto_tipas_id)
+            business_db = get_business_db_for_route_type(marsruto_tipas_id)
+            
+            if spatial_db and business_db:
+                logger.info(f"Deleting route {marsrutas_id} from {spatial_db}/{business_db}")
+                
+                if spatial_db not in queries:
+                    queries[spatial_db] = []
+                if business_db not in queries:
+                    queries[business_db] = []
+                
+                queries[spatial_db].append((
+                    "DELETE FROM marsrutai_spatial WHERE marsrutas_id = %s",
+                    (marsrutas_id,)
+                ))
+                queries[business_db].append((
+                    "DELETE FROM marsrutai_business WHERE marsrutas_id = %s",
+                    (marsrutas_id,)
+                ))
+                deleted_from.append(f"{spatial_db}/{business_db}")
         
-        queries = {
-            spatial_db: [(
-                "DELETE FROM marsrutai_spatial WHERE marsrutas_id = %s",
-                (marsrutas_id,)
-            )],
-            business_db: [(
-                "DELETE FROM marsrutai_business WHERE marsrutas_id = %s",
-                (marsrutas_id,)
-            )]
-        }
+        if not queries:
+            return {"success": False, "error": "No databases to delete from"}
         
         results, errors = DatabaseManager.execute_many_queries(queries)
         
         if errors:
             return {"success": False, "errors": errors}
-        return {"success": True, "message": f"Route {marsrutas_id} deleted"}
+        
+        return {
+            "success": True, 
+            "marsrutas_id": marsrutas_id,
+            "deleted_from": deleted_from,
+            "message": f"Route {marsrutas_id} deleted from {len(deleted_from)} database pair(s)"
+        }
 
 
 class VairuotojaiCRUD:
