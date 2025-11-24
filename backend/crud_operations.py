@@ -690,3 +690,148 @@ class StoteleCRUD:
             stops.extend([dict(row) for row in data])
         return {"success": True, "data": stops}
     
+    @staticmethod
+    def calculate_distance_between_stops(stotele_id_1, stotele_id_2):
+        """
+        Calculate distance between two stops using PostGIS ST_Distance function.
+        Returns distance in meters.
+        """
+        # Find stops in spatial databases
+        stop1 = None
+        stop2 = None
+        
+        for db in get_all_spatial_dbs():
+            if not stop1:
+                result = DatabaseManager.execute_query(
+                    db,
+                    "SELECT stotele_id, pavadinimas, stoteles_erdvine_vieta FROM stoteles WHERE stotele_id = %s",
+                    (stotele_id_1,)
+                )
+                if result:
+                    stop1 = {'db': db, 'data': result[0]}
+            
+            if not stop2:
+                result = DatabaseManager.execute_query(
+                    db,
+                    "SELECT stotele_id, pavadinimas, stoteles_erdvine_vieta FROM stoteles WHERE stotele_id = %s",
+                    (stotele_id_2,)
+                )
+                if result:
+                    stop2 = {'db': db, 'data': result[0]}
+        
+        if not stop1 or not stop2:
+            return {"success": False, "error": "One or both stops not found"}
+        
+        # Calculate distance using PostGIS ST_Distance with geography cast for accurate meters
+        # Use the database that has both stops, or use one and pass coordinates
+        db = stop1['db']
+        
+        distance_result = DatabaseManager.execute_query(
+            db,
+            """SELECT ST_Distance(
+                    ST_Transform((SELECT stoteles_erdvine_vieta FROM stoteles WHERE stotele_id = %s), 3857),
+                    ST_Transform((SELECT stoteles_erdvine_vieta FROM stoteles WHERE stotele_id = %s), 3857)
+               ) as distance_meters""",
+            (stotele_id_1, stotele_id_2)
+        )
+        
+        distance_meters = distance_result[0]['distance_meters']
+        
+        return {
+            "success": True,
+            "stotele_1": {
+                "id": stotele_id_1,
+                "pavadinimas": stop1['data']['pavadinimas']
+            },
+            "stotele_2": {
+                "id": stotele_id_2,
+                "pavadinimas": stop2['data']['pavadinimas']
+            },
+            "distance_meters": round(distance_meters, 2),
+            "distance_km": round(distance_meters / 1000, 2)
+        }
+    
+    @staticmethod
+    def find_nearby_stops(stotele_id, radius_meters=1000):
+        """
+        Find all stops within a given radius using PostGIS ST_DWithin function.
+        
+        Args:
+            stotele_id: The reference stop ID
+            radius_meters: Search radius in meters (default 1000m = 1km)
+        
+        Returns:
+            List of nearby stops with distances
+        """
+        # Find the reference stop
+        reference_stop = None
+        reference_db = None
+        
+        for db in get_all_spatial_dbs():
+            result = DatabaseManager.execute_query(
+                db,
+                """SELECT stotele_id, pavadinimas, 
+                          ST_X(stoteles_erdvine_vieta) as lon,
+                          ST_Y(stoteles_erdvine_vieta) as lat,
+                          stoteles_erdvine_vieta
+                   FROM stoteles WHERE stotele_id = %s""",
+                (stotele_id,)
+            )
+            if result:
+                reference_stop = dict(result[0])
+                reference_db = db
+                break
+        
+        if not reference_stop:
+            return {"success": False, "error": "Reference stop not found"}
+        
+        # Find nearby stops using ST_DWithin (spatial index optimized)
+        nearby_stops = []
+        
+        for db in get_all_spatial_dbs():
+            results = DatabaseManager.execute_query(
+                db,
+                """SELECT s.stotele_id, s.pavadinimas,
+                          ST_X(s.stoteles_erdvine_vieta) as lon,
+                          ST_Y(s.stoteles_erdvine_vieta) as lat,
+                          ST_Distance(
+                              ST_Transform(s.stoteles_erdvine_vieta, 3857),
+                              ST_Transform(
+                                  (SELECT stoteles_erdvine_vieta FROM stoteles WHERE stotele_id = %s LIMIT 1),
+                                  3857
+                              )
+                          ) as distance_meters
+                   FROM stoteles s
+                   WHERE s.stotele_id != %s
+                   AND ST_DWithin(
+                       ST_Transform(s.stoteles_erdvine_vieta, 3857),
+                       ST_Transform(
+                           (SELECT stoteles_erdvine_vieta FROM stoteles WHERE stotele_id = %s LIMIT 1),
+                           3857
+                       ),
+                       %s
+                   )
+                   ORDER BY distance_meters""",
+                (stotele_id, stotele_id, stotele_id, radius_meters)
+            )
+            
+            for row in results:
+                stop_data = dict(row)
+                stop_data['distance_meters'] = round(stop_data['distance_meters'], 2)
+                stop_data['distance_km'] = round(stop_data['distance_meters'] / 1000, 2)
+                nearby_stops.append(stop_data)
+        
+        return {
+            "success": True,
+            "reference_stop": {
+                "id": reference_stop['stotele_id'],
+                "pavadinimas": reference_stop['pavadinimas'],
+                "lon": reference_stop['lon'],
+                "lat": reference_stop['lat']
+            },
+            "radius_meters": radius_meters,
+            "radius_km": round(radius_meters / 1000, 2),
+            "nearby_stops": nearby_stops,
+            "count": len(nearby_stops)
+        }
+    

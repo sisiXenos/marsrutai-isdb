@@ -57,3 +57,92 @@ button:hover {
   border-radius: 8px;
   width: 300px;
 }
+
+/* PostGIS Section Styles */
+#postgis-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 1rem;
+}
+
+#postgis-section h3 {
+  color: #007bff;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+#postgis-section h3:first-child {
+  margin-top: 0;
+}
+
+.postgis-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.postgis-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+
+.postgis-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 150px;
+}
+
+.postgis-result {
+  background: #e7f3ff;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+  margin-top: 0.5rem;
+}
+
+.postgis-result h4 {
+  margin-top: 0;
+  color: #007bff;
+}
+
+.postgis-result p {
+  margin: 0.5rem 0;
+}
+
+.postgis-result ul {
+  margin-top: 0.5rem;
+}
+
+.postgis-result li {
+  background: white;
+  border-left: 3px solid #28a745;
+}
+
+#filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+#filters label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+#filters input,
+#filters select {
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

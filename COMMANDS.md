@@ -90,3 +90,78 @@ docker exec -it db22 psql -U postgres -d business -c "SELECT * FROM marsrutai_bu
 - **Horizontal Fragmentation**: Routes split by type (Maršrutinis vs Tarpmiestinis)
 - **CRUD Operations**: Create, Read, Update, Delete across all databases
 - **Synchronization**: Changes reflected in both spatial and business databases
+
+## PostGIS Spatial Functions
+
+### Calculate Distance Between Two Stops
+
+```bash
+# Calculate distance between stop 1 and stop 2
+curl "http://localhost:5000/api/stoteles/distance?stop1_id=1&stop2_id=2" | jq
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "stotele_1": {
+    "id": 1,
+    "pavadinimas": "Stotis"
+  },
+  "stotele_2": {
+    "id": 2,
+    "pavadinimas": "Centras"
+  },
+  "distance_meters": 5678.45,
+  "distance_km": 5.68
+}
+```
+
+### Find Nearby Stops
+
+```bash
+# Find all stops within 2000 meters of stop 1
+curl "http://localhost:5000/api/stoteles/nearby/1?radius=2000" | jq
+
+# Find stops within 5 kilometers
+curl "http://localhost:5000/api/stoteles/nearby/1?radius=5000" | jq
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "reference_stop": {
+    "id": 1,
+    "pavadinimas": "Stotis",
+    "lon": 25.3,
+    "lat": 54.7
+  },
+  "radius_meters": 2000,
+  "radius_km": 2.0,
+  "nearby_stops": [
+    {
+      "stotele_id": 2,
+      "pavadinimas": "Centras",
+      "distance_meters": 1234.56,
+      "distance_km": 1.23
+    }
+  ],
+  "count": 1
+}
+```
+
+### Test PostGIS Features
+
+```bash
+# Run the test script
+python test_postgis.py
+```
+
+### PostGIS Functions Used
+
+- **ST_Distance**: Calculates accurate distance between two geographic points in meters
+- **ST_DWithin**: Efficiently finds all points within a radius (uses spatial index)
+- **ST_Transform**: Converts coordinates to Web Mercator (EPSG:3857) for accurate measurements
+
+See `POSTGIS_FEATURES.md` for detailed documentation.

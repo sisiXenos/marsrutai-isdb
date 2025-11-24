@@ -144,3 +144,127 @@ clearFiltersBtn.addEventListener("click", () => {
 
 // =================== INITIAL LOAD ===================
 loadRoutes();
+
+// =================== POSTGIS FEATURES ===================
+
+// Calculate distance between two stops
+document.getElementById("calculate-distance").addEventListener("click", async () => {
+  const stop1Id = document.getElementById("stop1-id").value;
+  const stop2Id = document.getElementById("stop2-id").value;
+  const resultDiv = document.getElementById("distance-result");
+
+  if (!stop1Id || !stop2Id) {
+    resultDiv.innerHTML = "<p style='color: red;'>Prašome įvesti abu stotelių ID.</p>";
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/stoteles/distance?stop1_id=${stop1Id}&stop2_id=${stop2Id}`);
+    const data = await res.json();
+
+    if (data.success) {
+      resultDiv.innerHTML = `
+        <div class="postgis-result">
+          <h4>Rezultatas:</h4>
+          <p><strong>${data.stotele_1.pavadinimas}</strong> ↔ <strong>${data.stotele_2.pavadinimas}</strong></p>
+          <p>Atstumas: <strong>${data.distance_meters} m</strong> (${data.distance_km} km)</p>
+        </div>
+      `;
+    } else {
+      resultDiv.innerHTML = `<p style='color: red;'>Klaida: ${data.error}</p>`;
+    }
+  } catch (err) {
+    console.error("Error calculating distance:", err);
+    resultDiv.innerHTML = "<p style='color: red;'>Klaida skaičiuojant atstumą.</p>";
+  }
+});
+
+// Find nearby stops
+document.getElementById("find-nearby").addEventListener("click", async () => {
+  const stopId = document.getElementById("reference-stop-id").value;
+  const radius = document.getElementById("search-radius").value || 1000;
+  const resultDiv = document.getElementById("nearby-result");
+
+  if (!stopId) {
+    resultDiv.innerHTML = "<p style='color: red;'>Prašome įvesti stotelės ID.</p>";
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/stoteles/nearby/${stopId}?radius=${radius}`);
+    const data = await res.json();
+
+    if (data.success) {
+      // Clear previous markers
+      clearRouteLayers();
+
+      // Add reference stop marker (red)
+      const refMarker = L.marker([data.reference_stop.lat, data.reference_stop.lon], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).bindPopup(`<b>${data.reference_stop.pavadinimas}</b><br/>Bazinė stotelė`).addTo(map);
+      routeLayers.push(refMarker);
+
+      // Add circle to show search radius
+      const circle = L.circle([data.reference_stop.lat, data.reference_stop.lon], {
+        color: 'blue',
+        fillColor: '#3388ff',
+        fillOpacity: 0.1,
+        radius: radius
+      }).addTo(map);
+      routeLayers.push(circle);
+
+      // Add nearby stop markers (green)
+      if (data.nearby_stops.length > 0) {
+        data.nearby_stops.forEach(stop => {
+          const marker = L.marker([stop.lat, stop.lon], {
+            icon: L.icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41]
+            })
+          }).bindPopup(`<b>${stop.pavadinimas}</b><br/>Atstumas: ${stop.distance_meters} m`).addTo(map);
+          routeLayers.push(marker);
+        });
+
+        // Fit map to show all markers
+        const bounds = L.latLngBounds([data.reference_stop.lat, data.reference_stop.lon]);
+        data.nearby_stops.forEach(stop => bounds.extend([stop.lat, stop.lon]));
+        map.fitBounds(bounds, { padding: [50, 50] });
+
+        // Display results
+        resultDiv.innerHTML = `
+          <div class="postgis-result">
+            <h4>Rasta ${data.count} stotelių spinduliu ${data.radius_km} km nuo "${data.reference_stop.pavadinimas}":</h4>
+            <ul>
+              ${data.nearby_stops.map(stop => 
+                `<li><strong>${stop.pavadinimas}</strong> - ${stop.distance_meters} m (${stop.distance_km} km)</li>`
+              ).join('')}
+            </ul>
+          </div>
+        `;
+      } else {
+        map.setView([data.reference_stop.lat, data.reference_stop.lon], 13);
+        resultDiv.innerHTML = `
+          <div class="postgis-result">
+            <p>Nerasta stotelių spinduliu ${data.radius_km} km nuo "${data.reference_stop.pavadinimas}".</p>
+          </div>
+        `;
+      }
+    } else {
+      resultDiv.innerHTML = `<p style='color: red;'>Klaida: ${data.error}</p>`;
+    }
+  } catch (err) {
+    console.error("Error finding nearby stops:", err);
+    resultDiv.innerHTML = "<p style='color: red;'>Klaida ieškant artimų stotelių.</p>";
+  }
+});

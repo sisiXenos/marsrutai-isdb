@@ -41,6 +41,26 @@
   <h2>Stotelės pasirinktam maršrutui</h2>
   <ul id="stoteles-list"></ul>
 
+  <!-- PostGIS Features Section -->
+  <h2>PostGIS Funkcijos</h2>
+  <div id="postgis-section">
+    <h3>Atstumas tarp stotelių</h3>
+    <div class="postgis-form">
+      <label>Stotelė 1 ID: <input type="number" id="stop1-id" placeholder="pvz., 1" /></label>
+      <label>Stotelė 2 ID: <input type="number" id="stop2-id" placeholder="pvz., 2" /></label>
+      <button id="calculate-distance">Skaičiuoti atstumą</button>
+    </div>
+    <div id="distance-result"></div>
+
+    <h3>Artimos stotelės</h3>
+    <div class="postgis-form">
+      <label>Stotelės ID: <input type="number" id="reference-stop-id" placeholder="pvz., 1" /></label>
+      <label>Spindulys (m): <input type="number" id="search-radius" value="1000" placeholder="1000" /></label>
+      <button id="find-nearby">Rasti artimas stoteles</button>
+    </div>
+    <div id="nearby-result"></div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>

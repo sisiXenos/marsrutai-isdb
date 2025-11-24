@@ -22,7 +22,11 @@ def home():
             "routes": "/api/marsrutai",
             "drivers": "/api/vairuotojai",
             "transport": "/api/transport",
-            "stops": "/api/stoteles"
+            "stops": "/api/stoteles",
+            "postgis_features": {
+                "distance_between_stops": "/api/stoteles/distance?stop1_id={id1}&stop2_id={id2}",
+                "nearby_stops": "/api/stoteles/nearby/{stotele_id}?radius={meters}"
+            }
         }
     })
 
@@ -218,6 +222,49 @@ def get_stoteles_by_route(marsrutas_id):
         return jsonify(result)
     except Exception as e:
         logger.error(f"Error getting stops for route {marsrutas_id}: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/stoteles/distance", methods=['GET'])
+def calculate_stop_distance():
+    """
+    Calculate distance between two stops using PostGIS ST_Distance.
+    Query params: stop1_id, stop2_id
+    """
+    try:
+        stop1_id = request.args.get('stop1_id', type=int)
+        stop2_id = request.args.get('stop2_id', type=int)
+        
+        if not stop1_id or not stop2_id:
+            return jsonify({
+                "success": False, 
+                "error": "Both stop1_id and stop2_id are required"
+            }), 400
+        
+        result = StoteleCRUD.calculate_distance_between_stops(stop1_id, stop2_id)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error calculating distance: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/stoteles/nearby/<int:stotele_id>", methods=['GET'])
+def find_nearby_stops(stotele_id):
+    """
+    Find stops within a radius using PostGIS ST_DWithin.
+    Query params: radius (optional, default 1000 meters)
+    """
+    try:
+        radius = request.args.get('radius', default=1000, type=int)
+        
+        if radius <= 0 or radius > 50000:  # Max 50km
+            return jsonify({
+                "success": False,
+                "error": "Radius must be between 1 and 50000 meters"
+            }), 400
+        
+        result = StoteleCRUD.find_nearby_stops(stotele_id, radius)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error finding nearby stops: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ==================== GeoJSON endpoint for map visualization ====================
